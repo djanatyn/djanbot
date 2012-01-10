@@ -8,6 +8,8 @@ import Data.Time.Clock
 onMessage :: MIrc -> IrcMessage -> IO ()
 onMessage server message = case msg of
   "> hello"    -> sendMsg server origin $ B.pack ("hi there, " ++ (B.unpack user))
+  "> coi"      -> sendMsg server origin $ B.pack ("coi " ++ (B.unpack user))
+  "> poke"     -> sendMsg server origin $ B.pack "ouch!"
   "> time"     -> do
     time <- getCurrentTime
     sendMsg server origin $ B.pack ("the time is " ++ (show time))
@@ -15,7 +17,7 @@ onMessage server message = case msg of
   _            -> putStrLn (show message)
 
   where msg = mMsg message
-        user = B.drop 1 $ fromJust $ mUser message
+        user = B.drop 1 $ fromJust $ mNick message
         origin = fromJust $ mOrigin message
 
   
