@@ -17,7 +17,7 @@ onMessage server message = case msg of
   _            -> putStrLn (show message)
 
   where msg = mMsg message
-        user = B.drop 1 $ fromJust $ mNick message
+        user = fromJust $ mNick message
         origin = fromJust $ mOrigin message
 
   
