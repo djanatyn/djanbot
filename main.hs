@@ -5,16 +5,19 @@ import Network.SimpleIRC
 import Data.Maybe
 import Data.Time.Clock
 
+getTime :: IO String
+getTime = do
+  time <- getCurrentTime
+  return ("the current time is " ++ (show time))
+  
 onMessage :: MIrc -> IrcMessage -> IO ()
 onMessage server message = case msg of
   "> commands" -> sendToUser "my commands are: hello, time, commands."
   "> hello"    -> sendToOrigin ("hi there, " ++ (B.unpack user))
   "> coi"      -> sendToOrigin ("coi " ++ (B.unpack user))
   "> poke"     -> sendToOrigin "ouch!"
-  "> time"     -> do
-    time <- getCurrentTime
-    sendToOrigin ("the time is " ++ (show time))
-  _            -> putStrLn (show message)
+  "> time"     -> sendToOrigin =<< getTime
+  _  -> putStrLn (show message)
   where user = fromJust $ mNick message
         msg  = mMsg message
         sendToOrigin = sendMsg server (fromJust $ mOrigin message) . B.pack
