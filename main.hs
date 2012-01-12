@@ -7,19 +7,18 @@ import Data.Time.Clock
 
 onMessage :: MIrc -> IrcMessage -> IO ()
 onMessage server message = case msg of
-  "> hello"    -> sendMsg server origin $ B.pack ("hi there, " ++ (B.unpack user))
-  "> coi"      -> sendMsg server origin $ B.pack ("coi " ++ (B.unpack user))
-  "> poke"     -> sendMsg server origin $ B.pack "ouch!"
+  "> commands" -> sendToUser "my commands are: hello, time, commands."
+  "> hello"    -> sendToOrigin ("hi there, " ++ (B.unpack user))
+  "> coi"      -> sendToOrigin ("coi " ++ (B.unpack user))
+  "> poke"     -> sendToOrigin "ouch!"
   "> time"     -> do
     time <- getCurrentTime
-    sendMsg server origin $ B.pack ("the time is " ++ (show time))
-  "> commands" -> sendMsg server user $ B.pack "my commands are: hello, time, commands."
+    sendToOrigin ("the time is " ++ (show time))
   _            -> putStrLn (show message)
-
-  where msg = mMsg message
-        user = fromJust $ mNick message
-        origin = fromJust $ mOrigin message
-
+  where user = fromJust $ mNick message
+        msg  = mMsg message
+        sendToOrigin = sendMsg server (fromJust $ mOrigin message) . B.pack
+        sendToUser   = sendMsg server user . B.pack
   
 main :: IO ()
 main = do
@@ -29,6 +28,6 @@ main = do
     cNick = "djanbot",
     cUsername = "djanbot",
     cRealname = "djanbot",
-    cChannels = ["#djanbot", "#jbopre"], 
+    cChannels = ["#djanbot"], 
     cEvents = [(Privmsg onMessage)]} False True
   return ()
