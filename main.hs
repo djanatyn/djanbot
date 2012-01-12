@@ -1,8 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 import qualified Data.ByteString.Char8 as B
+import qualified Network.SimpleIRC.Messages as M
 import Control.Applicative
 import Network.SimpleIRC
 import Data.Maybe
+import Control.Monad
 import Data.Time.Clock
 
 getTime :: IO String
@@ -17,7 +19,7 @@ onMessage server message = case msg of
   "> coi"      -> sendToOrigin ("coi " ++ (B.unpack user))
   "> poke"     -> sendToOrigin "ouch!"
   "> time"     -> sendToOrigin =<< getTime
-  _  -> putStrLn (show message)
+  _  -> putStr ((show user) ++ " -- ") >> putStrLn (show msg) >> putStr "> "
   where user = fromJust $ mNick message
         msg  = mMsg message
         sendToOrigin = sendMsg server (fromJust $ mOrigin message) . B.pack
@@ -31,6 +33,12 @@ main = do
     cNick = "djanbot",
     cUsername = "djanbot",
     cRealname = "djanbot",
-    cChannels = ["#djanbot"], 
-    cEvents = [(Privmsg onMessage)]} False True
+    cChannels = ["#djanbot","#jbopre"], 
+    cEvents = [(Privmsg onMessage)]} True False
+  case connection of
+    Right server  -> forever $ do
+      putStr "> "
+      input <- getLine
+      sendMsg server "#jbopre" (B.pack input)
+    Left server -> putStrLn "failure"
   return ()
